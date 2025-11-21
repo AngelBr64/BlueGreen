@@ -26,10 +26,11 @@ jobs:
             -e "ssh -i ~/.ssh/id_rsa" \
             ./ root@${{ secrets.VPS_HOST }}:/root/bluegreen_project/
 
-      - name: Fix script permissions on VPS
+      - name: Install dos2unix + fix permissions
         run: |
           ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
-            "cd /root/bluegreen_project/scripts && \
+            "apt-get update -y && apt-get install -y dos2unix && \
+             cd /root/bluegreen_project/scripts && \
              dos2unix *.sh && chmod +x *.sh"
 
       - name: Run Deployment Script (BLUE)
