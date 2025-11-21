@@ -1,2 +1,6 @@
 #!/bin/bash
-docker-compose up -d --build green
+echo "Deploying GREEN..."
+
+docker compose up -d --build green
+
+echo "GREEN deployed!"

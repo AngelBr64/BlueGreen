@@ -1,2 +1,6 @@
 #!/bin/bash
-docker-compose up -d --build blue
+echo "Deploying BLUE..."
+
+docker compose up -d --build blue
+
+echo "BLUE deployed!"
