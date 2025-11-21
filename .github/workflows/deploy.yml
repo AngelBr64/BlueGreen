@@ -26,14 +26,19 @@ jobs:
             -e "ssh -i ~/.ssh/id_rsa" \
             ./ root@${{ secrets.VPS_HOST }}:/root/bluegreen_project/
 
-      - name: Install dos2unix + fix permissions
+      - name: Install dependencies on VPS
         run: |
-          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
-            "apt-get update -y && apt-get install -y dos2unix && \
-             cd /root/bluegreen_project/scripts && \
-             dos2unix *.sh && chmod +x *.sh"
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
+            apt-get update -y &&
+            apt-get install -y docker.io docker-compose-plugin dos2unix &&
+            systemctl enable docker &&
+            systemctl start docker &&
+            cd /root/bluegreen_project/scripts &&
+            dos2unix *.sh &&
+            chmod +x *.sh
+          "
 
       - name: Run Deployment Script (BLUE)
         run: |
           ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
-            "cd /root/bluegreen_project/scripts && bash deploy-blue.sh"
+            'cd /root/bluegreen_project/scripts && bash deploy-blue.sh'
