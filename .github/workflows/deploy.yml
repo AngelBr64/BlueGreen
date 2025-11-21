@@ -26,13 +26,11 @@ jobs:
             -e "ssh -i ~/.ssh/id_rsa" \
             ./ root@${{ secrets.VPS_HOST }}:/root/bluegreen_project/
 
-      - name: Install dependencies on VPS
+      - name: Prepare environment on VPS
         run: |
           ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
             apt-get update -y &&
-            apt-get install -y docker.io docker-compose-plugin dos2unix &&
-            systemctl enable docker &&
-            systemctl start docker &&
+            apt-get install -y dos2unix docker-compose-plugin &&
             cd /root/bluegreen_project/scripts &&
             dos2unix *.sh &&
             chmod +x *.sh
