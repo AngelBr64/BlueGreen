@@ -1,15 +1,19 @@
 name: Deploy to VPS (Blue-Green)
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       target:
-        description: "Which environment to deploy? blue or green"
+        description: "Which version to deploy: blue or green"
         required: true
         default: "blue"
+        type: choice
+        options:
+          - blue
+          - green
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
@@ -42,13 +46,12 @@ jobs:
             chmod +x *.sh
           "
 
-      - name: Deploy selected environment
+      - name: Run Deployment (BLUE or GREEN)
         run: |
-          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
-            cd /root/bluegreen_project/scripts &&
-            if [ '${{ github.event.inputs.target }}' = 'green' ]; then
-              bash deploy-green.sh;
-            else
-              bash deploy-blue.sh;
-            fi
-          "
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
+            "cd /root/bluegreen_project/scripts && \
+            if [ '${{ github.event.inputs.target }}' = 'blue' ]; then \
+              bash deploy-blue.sh; \
+            else \
+              bash deploy-green.sh; \
+            fi"

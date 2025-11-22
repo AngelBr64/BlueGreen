@@ -1,9 +1,13 @@
 #!/bin/bash
+
 echo "Deploying BLUE..."
 
-docker compose -f docker-compose-blue.yml up -d --build
+docker compose -f /root/bluegreen_project/docker-compose.yml up -d --build blue
 
-echo "active_env blue;" > /etc/nginx/active_env
-nginx -s reload
+# Cambiar active.conf
+echo 'map "" $active_upstream { default blue; }' > /etc/nginx/conf.d/active.conf
 
-echo "BLUE deployed! x"
+# Recargar nginx
+nginx -t && systemctl reload nginx
+
+echo "BLUE is now active!"
