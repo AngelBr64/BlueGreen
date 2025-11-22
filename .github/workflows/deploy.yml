@@ -46,12 +46,26 @@ jobs:
             chmod +x *.sh
           "
 
-      - name: Run Deployment (BLUE or GREEN)
+      - name: Determine target (BLUE or GREEN)
+        id: set_target
         run: |
-          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
-            "cd /root/bluegreen_project/scripts && \
-            if [ '${{ github.event.inputs.target }}' = 'blue' ]; then \
-              bash deploy-blue.sh; \
-            else \
-              bash deploy-green.sh; \
-            fi"
+          if [ -z "${{ github.event.inputs.target }}" ]; then
+            echo "target=blue" >> $GITHUB_OUTPUT
+          else
+            echo "target=${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Show target
+        run: |
+          echo "Deploy target = ${{ steps.set_target.outputs.target }}"
+
+      - name: Run Deployment
+        run: |
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
+            cd /root/bluegreen_project/scripts &&
+            if [ '${{ steps.set_target.outputs.target }}' = 'blue' ]; then
+              bash deploy-blue.sh;
+            else
+              bash deploy-green.sh;
+            fi
+          "
