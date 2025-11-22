@@ -20,6 +20,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Determine target (blue by default on push)
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TARGET=${{ github.event.inputs.target }}" >> $GITHUB_ENV
+          else
+            echo "TARGET=blue" >> $GITHUB_ENV
+          fi
+          echo "Using TARGET=$TARGET"
+
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -46,26 +56,12 @@ jobs:
             chmod +x *.sh
           "
 
-      - name: Determine target (BLUE or GREEN)
-        id: set_target
+      - name: Run Deployment (blue or green)
         run: |
-          if [ -z "${{ github.event.inputs.target }}" ]; then
-            echo "target=blue" >> $GITHUB_OUTPUT
-          else
-            echo "target=${{ github.event.inputs.target }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Show target
-        run: |
-          echo "Deploy target = ${{ steps.set_target.outputs.target }}"
-
-      - name: Run Deployment
-        run: |
-          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
-            cd /root/bluegreen_project/scripts &&
-            if [ '${{ steps.set_target.outputs.target }}' = 'blue' ]; then
-              bash deploy-blue.sh;
-            else
-              bash deploy-green.sh;
-            fi
-          "
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
+            "cd /root/bluegreen_project/scripts && \
+            if [ '${{ env.TARGET }}' = 'blue' ]; then \
+              bash deploy-blue.sh; \
+            else \
+              bash deploy-green.sh; \
+            fi"
