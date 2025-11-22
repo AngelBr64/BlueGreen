@@ -1,6 +1,9 @@
 #!/bin/bash
 echo "Deploying BLUE..."
 
-docker compose up -d --build blue
+docker compose -f docker-compose-blue.yml up -d --build
 
-echo "BLUE deployed! xd"
+echo "active_env blue;" > /etc/nginx/active_env
+nginx -s reload
+
+echo "BLUE deployed! x"

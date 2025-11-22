@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Which environment to deploy? blue or green"
+        required: true
+        default: "blue"
 
 jobs:
   deploy:
@@ -36,7 +42,13 @@ jobs:
             chmod +x *.sh
           "
 
-      - name: Run Deployment Script (BLUE)
+      - name: Deploy selected environment
         run: |
-          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} \
-            'cd /root/bluegreen_project/scripts && bash deploy-blue.sh'
+          ssh -i ~/.ssh/id_rsa root@${{ secrets.VPS_HOST }} "
+            cd /root/bluegreen_project/scripts &&
+            if [ '${{ github.event.inputs.target }}' = 'green' ]; then
+              bash deploy-green.sh;
+            else
+              bash deploy-blue.sh;
+            fi
+          "
